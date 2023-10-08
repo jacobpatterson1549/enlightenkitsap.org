@@ -1,0 +1,70 @@
+body {
+    text-align: center;
+    background-color: #fff;;
+}
+
+header {
+    background-color: #262626;
+    min-height: 250px;
+    height: 30vh;
+}
+
+header .banner,
+nav {
+    background-color: #1d1d1d;
+}
+
+header .banner {
+    display:inline-block
+}
+
+header {
+    color: #fff;
+}
+
+nav,
+h1 {
+    text-transform: uppercase;
+}
+
+h2 {
+    text-transform: capitalize;
+}
+
+h3 {
+    text-align: left;
+}
+
+/* TODO: collapse about menu  */
+/* nav a + ul {
+    display: none;
+}
+
+nav a:hover + ul {
+    display: unset;
+} */
+
+nav a:not(:first-child)::before {
+    content: "/";
+    color: #444;
+}
+
+p {
+    text-align: justify;
+}
+
+.center {
+    text-align: center;
+}
+
+.left {
+    text-align: left;
+}
+
+.xxl {
+    font-size: xx-large;
+}
+
+a[href^="mailto:"] {
+	overflow-wrap: break-word;
+}

@@ -1,0 +1,50 @@
+{{- define "img"}}<img src="{{.Src}}" alt="{{.Alt}}">{{end -}}
+{{- define "link"}}<a href="{{.Href}}">{{.Name}}</a>{{end -}}
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<meta name="Description" content="{{.Site.Name}} | {{.Site.Description}}">
+	<title>{{.Page.Name}}{{if ne .Page.Name .Site.Name}} | {{.Site.Name}}{{end}}</title>
+	<link rel="shortcut icon" href="data:image/x-icon;base64," type="image/x-icon">
+	<style>
+{{template "index.css" .}}
+	</style>
+</head>
+
+<body>
+
+    <header>
+        <div class="banner">
+            <h1>{{.Site.Name}}</h1>
+            <h2>{{.Site.Description}}
+        </div>
+        <nav>
+            <a href="/" title="home">Home</a>
+            <ul>
+                <ol><a href="/board-members.html">Board Members</a></ol>
+                <ol><a href="/volunteers.html">Volunteers</a></ol>
+                <ol><a href="/mission-statement.html">Mission Statement</a></ol>
+                <ol><a href="/purpose-statement.html">Purpose Statement</a></ol>
+                <ol><a href="/contact-us.html">Contact Us</a></ol>
+                <ol><a href="/donations.html">Donations</a></ol>
+                <ol><a href="/location.html">Location</a></ol>
+            </ul>
+            <a href="/calendar.html">Calendar</a>
+            <a href="/future-events.html">Upcoming Speakers</a>
+            <a href="/sign-up.html">Sign Up For Events</a>
+            <a href="/past-events.html">Past Events</a>
+        </nav>
+    </header>
+
+	<main>
+        <h3>{{.Page.Name}}</h3>
+        <img src="images/enlighten-logo.png" alt="{{.Site.Name}} logo with words">
+        {{- template "content" .Page.Data}}
+    </main>
+
+</body>
+
+</html>

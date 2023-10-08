@@ -1,0 +1,7 @@
+# Ignore everything
+*
+
+# Necessary files
+!go.mod
+!*.go
+!internal
