@@ -50,7 +50,6 @@ func writeFiles(dest string) error {
 	if err := cleanDest(dest); err != nil {
 		return fmt.Errorf("cleaning destination directory: %w", err)
 	}
-
 	site := Site{
 		Name:        "Enl!ghten",
 		Description: "Kitsap Community Forum",
@@ -89,7 +88,20 @@ func writeFiles(dest string) error {
 			return fmt.Errorf("writing file %v, %w", fileName, err)
 		}
 	}
-	// TODO: write non-files from resources
+	imageDirs := []struct {
+		src  string
+		dest string
+	}{
+		{"", ""}, // root images from resources
+		{"about", "board"},
+	}
+	for _, img := range imageDirs {
+		src := path.Join(resources, img.src, "images")
+		dest := path.Join(dest, "images", img.dest)
+		if err := addImages(src, dest); err != nil {
+			return fmt.Errorf("adding images from: %w", err)
+		}
+	}
 	return nil
 }
 
@@ -117,6 +129,32 @@ func writeFile(destDir, srcDir, name string, data interface{}) error {
 	dest := path.Join(destDir, name)
 	if err := os.WriteFile(dest, b, perm); err != nil {
 		return fmt.Errorf("writing template: %w", err)
+	}
+	return nil
+}
+
+func addImages(src, dest string) error {
+	entries, err := siteFS.ReadDir(src)
+	if err != nil {
+		return fmt.Errorf("reading image directory: %w", err)
+	}
+	if err := os.MkdirAll(dest, perm); err != nil {
+		return fmt.Errorf("creating image directory: %w", err)
+	}
+	for _, f := range entries {
+		if f.IsDir() {
+			return fmt.Errorf("will not read directory from image folder")
+		}
+		n := f.Name()
+		srcP := path.Join(src, n)
+		b, err := siteFS.ReadFile(srcP)
+		if err != nil {
+			return fmt.Errorf("reading image: %w", err)
+		}
+		destP := path.Join(dest, n)
+		if err := os.WriteFile(destP, b, perm); err != nil {
+			return fmt.Errorf("writing image: %w", err)
+		}
 	}
 	return nil
 }

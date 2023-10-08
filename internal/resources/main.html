@@ -17,19 +17,22 @@
 
 <body>
 
-    <header>
-        <div class="banner">
-            <h1><a href=".">{{.Site.Name}}</a></h1>
-            <h2>{{.Site.Description}}
-        </div>
-        {{template "nav.html" .}}
-    </header>
+	<header>
+		<div class="banner">
+			<h1><a href=".">{{.Site.Name}}</a></h1>
+			<h2>{{.Site.Description}}
+		</div>
+		{{template "nav.html" .}}
+	</header>
 
 	<main>
-        <h3>{{.Page.Name}}</h3>
-        <img src="images/enlighten-logo.png" alt="{{.Site.Name}} logo with words">
-        {{- template "content" .Page.Data}}
-    </main>
+		<h3>{{.Page.Name}}</h3>
+		<img src="images/enlighten-logo.png" alt="{{.Site.Name}} logo with words" class="inline">
+		{{- template "content" .Page.Data}}
+	</main>
+
+	<footer>
+	</footer>
 
 </body>
 

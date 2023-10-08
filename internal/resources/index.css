@@ -4,22 +4,37 @@ body {
     line-height: 1.6;
 }
 
-img,
 picture,
 svg {
     max-width: 100%;
     display: block;
 }
 
+img {
+    max-width: 100%;
+}
+
+p img:first-child {
+    display: inline;
+    float: left;
+    margin-right: 1.7em;
+}
+
 main {
     width: min(65ch, 100% - 4rem);
-    margin-inline: auto;
+    margin: 5em auto;
 }
 
 body {
     margin: 0;
     text-align: center;
     background-color: #fff;;
+}
+
+footer {
+    background-color: #262626;
+    margin-top: 5em;
+    min-height: 150px;;
 }
 
 header {
@@ -34,6 +49,7 @@ nav {
 }
 
 header .banner {
+    max-width: 50vw;
     display:inline-block;
     margin: 4em;
     padding: 2em;
@@ -47,7 +63,6 @@ header {
 }
 
 h1 {
-    font-size: xxx-large;
     text-transform: uppercase;
 }
 
@@ -60,7 +75,9 @@ nav {
 }
 
 h3 {
+    font-size: xxx-large;
     text-align: left;
+    color: #262626;
 }
 
 p {
@@ -81,4 +98,12 @@ p {
 
 a[href^="mailto:"] {
 	overflow-wrap: break-word;
+}
+
+.inline {
+    display: inline;
+}
+
+.board-members p {
+    margin: 5em 0;
 }
