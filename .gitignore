@@ -1,2 +1,4 @@
 /build
 /.env
+# VSCode generated files
+/__debug_bin*
