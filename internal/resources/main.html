@@ -10,7 +10,8 @@
 	<title>{{.Page.Name}}{{if ne .Page.Name .Site.Name}} | {{.Site.Name}}{{end}}</title>
 	<link rel="shortcut icon" href="data:image/x-icon;base64," type="image/x-icon">
 	<style>
-{{template "index.css" .}}
+{{template "index.css"}}
+{{template "nav.css"}}
 	</style>
 </head>
 
@@ -18,25 +19,10 @@
 
     <header>
         <div class="banner">
-            <h1>{{.Site.Name}}</h1>
+            <h1><a href=".">{{.Site.Name}}</a></h1>
             <h2>{{.Site.Description}}
         </div>
-        <nav>
-            <a href="/" title="home">Home</a>
-            <ul>
-                <ol><a href="/board-members.html">Board Members</a></ol>
-                <ol><a href="/volunteers.html">Volunteers</a></ol>
-                <ol><a href="/mission-statement.html">Mission Statement</a></ol>
-                <ol><a href="/purpose-statement.html">Purpose Statement</a></ol>
-                <ol><a href="/contact-us.html">Contact Us</a></ol>
-                <ol><a href="/donations.html">Donations</a></ol>
-                <ol><a href="/location.html">Location</a></ol>
-            </ul>
-            <a href="/calendar.html">Calendar</a>
-            <a href="/future-events.html">Upcoming Speakers</a>
-            <a href="/sign-up.html">Sign Up For Events</a>
-            <a href="/past-events.html">Past Events</a>
-        </nav>
+        {{template "nav.html" .}}
     </header>
 
 	<main>

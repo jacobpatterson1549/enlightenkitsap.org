@@ -122,12 +122,13 @@ func writeFile(destDir, srcDir, name string, data interface{}) error {
 }
 
 func lookupTemplate(content string) (*template.Template, error) {
-	main := path.Join(resources, "main.html")
-	css := path.Join(resources, "index.css")
-
+	mainHTML := path.Join(resources, "main.html")
+	mainCSS := path.Join(resources, "index.css")
+	navHTML := path.Join(resources, "nav.html")
+	navCSS := path.Join(resources, "nav.css")
 	t, err := template.New("main.html").
 		Option("missingkey=error").
-		ParseFS(siteFS, main, css, content)
+		ParseFS(siteFS, mainHTML, mainCSS, navHTML, navCSS, content)
 	if err != nil {
 		return nil, fmt.Errorf("parsing template filesystem: %w", err)
 	}

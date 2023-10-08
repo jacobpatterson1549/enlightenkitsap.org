@@ -1,4 +1,23 @@
 body {
+    font-family: system-ui;
+    font-size: 1.125rem;
+    line-height: 1.6;
+}
+
+img,
+picture,
+svg {
+    max-width: 100%;
+    display: block;
+}
+
+main {
+    width: min(65ch, 100% - 4rem);
+    margin-inline: auto;
+}
+
+body {
+    margin: 0;
     text-align: center;
     background-color: #fff;;
 }
@@ -6,24 +25,29 @@ body {
 header {
     background-color: #262626;
     min-height: 250px;
-    height: 30vh;
 }
 
 header .banner,
+nav .dropdown-content,
 nav {
     background-color: #1d1d1d;
 }
 
 header .banner {
-    display:inline-block
+    display:inline-block;
+    margin: 4em;
+    padding: 2em;
 }
 
+h1 a,
+nav a,
 header {
     color: #fff;
+    text-decoration: unset;
 }
 
-nav,
 h1 {
+    font-size: xxx-large;
     text-transform: uppercase;
 }
 
@@ -31,22 +55,12 @@ h2 {
     text-transform: capitalize;
 }
 
+nav {
+    text-transform: uppercase;
+}
+
 h3 {
     text-align: left;
-}
-
-/* TODO: collapse about menu  */
-/* nav a + ul {
-    display: none;
-}
-
-nav a:hover + ul {
-    display: unset;
-} */
-
-nav a:not(:first-child)::before {
-    content: "/";
-    color: #444;
 }
 
 p {
