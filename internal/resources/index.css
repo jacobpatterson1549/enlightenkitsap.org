@@ -4,12 +4,6 @@ body {
     line-height: 1.6;
 }
 
-picture,
-svg {
-    max-width: 100%;
-    display: block;
-}
-
 img {
     max-width: 100%;
 }
@@ -106,4 +100,18 @@ a[href^="mailto:"] {
 
 .board-members p {
     margin: 5em 0;
+}
+
+.event-group {
+    font-size: larger;
+}
+
+.board-members img {
+    max-width: 196px;
+    max-height: 300px;
+}
+
+.events img {
+    max-width: 125px;
+    max-height: 190px;
 }

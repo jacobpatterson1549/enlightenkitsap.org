@@ -1,0 +1,6 @@
+{{define "content"}}
+{{- range .}}
+{{with .Year}}<p id="past-event-{{.}}" class="event-group">{{.}}<p>{{end}}
+{{.Resources.String}}
+{{- end}}
+{{end}}
