@@ -2,11 +2,10 @@
 FROM golang:1.21-alpine3.18 AS BUILDER
 WORKDIR /app
 COPY . ./
-RUN <<EOT
-go generate
-go test
-CGO_ENABLED=0 go build -o enlightenkitsap
-EOT
+RUN \
+    go generate && \
+    go test && \
+    CGO_ENABLED=0 go build -o enlightenkitsap
 
 # copy the server to a minimal build image
 FROM scratch

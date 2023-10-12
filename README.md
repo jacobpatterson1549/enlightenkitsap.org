@@ -19,3 +19,5 @@ Remember to re-generate the site when developing the site on on a computer with 
 Run the site with `go generate && go run enlightenkitsap.org`
 
 [VSCode](https://code.visualstudio.com/) is a useful integrated development environment.
+
+Build the site as a single executable to the build folder with `go generate && go build -o build/enlightenkitsap enlightenkitsap.org`
