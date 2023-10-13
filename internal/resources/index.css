@@ -115,3 +115,8 @@ a[href^="mailto:"] {
     max-width: 125px;
     max-height: 190px;
 }
+
+.resources ol,
+.resources ul {
+    text-align: left;
+}

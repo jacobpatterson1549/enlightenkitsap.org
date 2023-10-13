@@ -296,14 +296,13 @@ func (yr *PastEventYear) addFile(s *Site, dir, year string, ff fs.DirEntry) erro
 		if err := yr.addEvent(src); err != nil {
 			return fmt.Errorf("adding event: %w", err)
 		}
-	case ".png", ".jpg":
+	case ".jpg", ".jpeg", ".png":
 		// TODO: resize images to max 125w, 150h
 		dest := path.Join(s.dest, "images", "events", year)
 		if err := addImage(ff, dir, dest); err != nil { // TODO: use less-generic version of addImage, providing data
 			return fmt.Errorf("adding resource: %w", err)
 		}
-	case ".pptx", ".pdf":
-		// TODO: resize images to max 125w, 150h
+	case ".docx", ".pdf", ".ppt", ".pptx", ".xlsx":
 		if err := yr.addResource(s, year, nn, dir); err != nil {
 			return fmt.Errorf("adding resource: %w", err)
 		}
