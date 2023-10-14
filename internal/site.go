@@ -296,7 +296,7 @@ func (yr *PastEventYear) addFile(s *Site, dir, year string, ff fs.DirEntry) erro
 		if err := yr.addEvent(src); err != nil {
 			return fmt.Errorf("adding event: %w", err)
 		}
-	case ".jpg", ".jpeg", ".png":
+	case ".jpg", ".jpeg", ".png", ".webp":
 		// TODO: resize images to max 125w, 150h
 		dest := path.Join(s.dest, "images", "events", year)
 		if err := addImage(ff, dir, dest); err != nil { // TODO: use less-generic version of addImage, providing data
