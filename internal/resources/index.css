@@ -116,6 +116,11 @@ a[href^="mailto:"] {
     max-height: 190px;
 }
 
+.events img.right {
+    float: right;
+    margin-left: 2em;
+}
+
 .resources ol,
 .resources ul {
     text-align: left;
