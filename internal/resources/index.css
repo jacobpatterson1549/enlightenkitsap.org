@@ -1,93 +1,93 @@
 body {
-    font-family: system-ui;
-    font-size: 1.125rem;
-    line-height: 1.6;
+	font-family: system-ui;
+	font-size: 1.125rem;
+	line-height: 1.6;
 }
 
 img {
-    max-width: 100%;
+	max-width: 100%;
 }
 
 p img:first-child {
-    display: inline;
-    float: left;
-    margin-right: 1.7em;
+	display: inline;
+	float: left;
+	margin-right: 1.7em;
 }
 
 main {
-    width: min(65ch, 100% - 4rem);
-    margin: 5em auto;
+	width: min(65ch, 100% - 4rem);
+	margin: 5em auto;
 }
 
 body {
-    margin: 0;
-    text-align: center;
-    background-color: #fff;;
+	margin: 0;
+	text-align: center;
+	background-color: #fff;;
 }
 
 footer {
-    background-color: #262626;
-    margin-top: 5em;
-    min-height: 150px;;
+	background-color: #262626;
+	margin-top: 5em;
+	min-height: 150px;;
 }
 
 header {
-    background-color: #262626;
-    min-height: 250px;
+	background-color: #262626;
+	min-height: 250px;
 }
 
 header .banner,
 nav .dropdown-content,
 nav {
-    background-color: #1d1d1d;
+	background-color: #1d1d1d;
 }
 
 header .banner {
-    max-width: 50vw;
-    display:inline-block;
-    margin: 4em;
-    padding: 2em;
+	max-width: 50vw;
+	display:inline-block;
+	margin: 4em;
+	padding: 2em;
 }
 
 h1 a,
 nav a,
 header {
-    color: #fff;
-    text-decoration: unset;
+	color: #fff;
+	text-decoration: unset;
 }
 
 h1 {
-    text-transform: uppercase;
+	text-transform: uppercase;
 }
 
 h2 {
-    text-transform: capitalize;
+	text-transform: capitalize;
 }
 
 nav {
-    text-transform: uppercase;
+	text-transform: uppercase;
 }
 
 h3 {
-    font-size: xxx-large;
-    text-align: left;
-    color: #262626;
+	font-size: xxx-large;
+	text-align: left;
+	color: #262626;
 }
 
 p {
-    text-align: justify;
+	text-align: justify;
 }
 
 .center {
-    text-align: center;
+	text-align: center;
 }
 
 .left {
-    text-align: left;
+	text-align: left;
 }
 
 .xxl {
-    font-size: xx-large;
+	font-size: xx-large;
 }
 
 a[href^="mailto:"] {
@@ -95,48 +95,48 @@ a[href^="mailto:"] {
 }
 
 .inline {
-    display: inline;
+	display: inline;
 }
 
 .board-members p {
-    margin: 5em 0;
+	margin: 5em 0;
 }
 
 iframe {
-    border: 0;
+	border: 0;
 }
 
 .sign-up iframe {
-    width: 100%;
-    height: 1800px;
-    margin: 0;
+	width: 100%;
+	height: 1800px;
+	margin: 0;
 }
 
 .resource iframe[src^="https://www.youtu"] {
-    width: 676px;
-    height: 380px;
+	width: 676px;
+	height: 380px;
 }
 
 .event-group {
-    font-size: larger;
+	font-size: larger;
 }
 
 .board-members img {
-    max-width: 196px;
-    max-height: 300px;
+	max-width: 196px;
+	max-height: 300px;
 }
 
 .events img {
-    max-width: 125px;
-    max-height: 190px;
+	max-width: 125px;
+	max-height: 190px;
 }
 
 .events img.right {
-    float: right;
-    margin-left: 2em;
+	float: right;
+	margin-left: 2em;
 }
 
 .resource p,
 .resource {
-    text-align: left;
+	text-align: left;
 }
