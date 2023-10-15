@@ -121,7 +121,6 @@ a[href^="mailto:"] {
     margin-left: 2em;
 }
 
-.resources ol,
-.resources ul {
+.resources {
     text-align: left;
 }
