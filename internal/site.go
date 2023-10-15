@@ -18,6 +18,7 @@ var siteFS embed.FS
 const (
 	resources = "resources"
 	perm      = 0764
+	kB100     = 50 * 1_000
 )
 
 func usage() {
@@ -147,20 +148,23 @@ func addImages(src, dest string) error {
 		return fmt.Errorf("creating image directory: %w", err)
 	}
 	for _, f := range entries {
-		if err := addImage(f, src, dest); err != nil {
+		if err := addImage(f, src, dest, 0); err != nil {
 			return fmt.Errorf("adding image: %w", err)
 		}
 	}
 	return nil
 }
 
-func addImage(f fs.DirEntry, src, dest string) error {
+func addImage(f fs.DirEntry, src, dest string, maxSize int) error {
 	if f.IsDir() {
 		return fmt.Errorf("will not read directory from image folder")
 	}
 	n := f.Name()
 	srcP := path.Join(src, n)
 	b, err := siteFS.ReadFile(srcP)
+	if len(b) > maxSize && maxSize > 0 {
+		return fmt.Errorf("image %q larger than %v bytes", n, maxSize)
+	}
 	if err != nil {
 		return fmt.Errorf("reading image: %w", err)
 	}
@@ -322,7 +326,7 @@ func (yr *PastEventYear) addFile(s *Site, dir, year string, ff fs.DirEntry) erro
 		}
 	case ".jpg", ".png":
 		dest := path.Join(s.dest, "images", "events", year)
-		if err := addImage(ff, dir, dest); err != nil { // TODO: use less-generic version of addImage, providing data
+		if err := addImage(ff, dir, dest, kB100); err != nil {
 			return fmt.Errorf("adding resource: %w", err)
 		}
 	case ".docx", ".pdf", ".ppt", ".pptx", ".xlsx":
