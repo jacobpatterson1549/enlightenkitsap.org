@@ -83,7 +83,6 @@ func (s *Site) addMain() error {
 		{"about", "purpose-statement", "Purpose Statement", nil},
 		{"about", "volunteers", "Volunteers", nil},
 		{"events", "calendar", "Calendar", nil},
-		{"events", "future-events", "Future Events", nil},
 		{"events", "sign-up", "Sign Up For Events", nil},
 	}
 	for _, pg := range pages {
@@ -217,9 +216,9 @@ type (
 	}
 )
 
-func (s *Site) addPage(destName, srcDir, srcName string, data interface{}) error {
+func (s *Site) addPage(pageName, srcDir, srcName string, data interface{}) error {
 	p := Page{
-		Name: destName,
+		Name: pageName,
 		Data: data,
 	}
 	tmplData := Data{
@@ -233,13 +232,38 @@ func (s *Site) addPage(destName, srcDir, srcName string, data interface{}) error
 }
 
 func (s *Site) addEvents() error {
-	// TODO: calendar
-	// TODO: future events
 	// TODO href #anchor to year div s
+	if err := s.addFutureEvents(); err != nil {
+		return fmt.Errorf("adding future events: %w", err)
+	}
 	if err := s.addPastEvents(); err != nil {
 		return fmt.Errorf("adding past events: %w", err)
 	}
 	return nil
+}
+
+func (s *Site) addFutureEvents() error {
+	eventsDir := path.Join(resources, "events")
+	eventEntries, err := fs.ReadDir(siteFS, eventsDir)
+	if err != nil {
+		return fmt.Errorf("reading events: %w", err)
+	}
+	idx := slices.IndexFunc(eventEntries, func(de fs.DirEntry) bool {
+		n := de.Name()
+		return n == "future"
+	})
+	if idx < 0 {
+		return fmt.Errorf("futureEvents directory not found")
+	}
+	futureEntry := eventEntries[idx]
+	yr, err := s.addFolder(eventsDir, futureEntry)
+	if err != nil {
+		return fmt.Errorf("adding future events folder: %w", err)
+	}
+	if err := s.addPage("Upcoming Speakers", "events", "future-events.html", yr); err != nil {
+		return fmt.Errorf("adding future events page: %w", err)
+	}
+	return err
 }
 
 func (s *Site) addPastEvents() error {
