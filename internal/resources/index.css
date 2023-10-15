@@ -102,11 +102,19 @@ a[href^="mailto:"] {
     margin: 5em 0;
 }
 
+iframe {
+    border: 0;
+}
+
 .sign-up iframe {
     width: 100%;
     height: 1800px;
-    border: 0;
     margin: 0;
+}
+
+.resource iframe[src^="https://www.youtu"] {
+    width: 676px;
+    height: 380px;
 }
 
 .event-group {
@@ -128,6 +136,7 @@ a[href^="mailto:"] {
     margin-left: 2em;
 }
 
-.resources {
+.resource p,
+.resource {
     text-align: left;
 }

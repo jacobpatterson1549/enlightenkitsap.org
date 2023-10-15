@@ -73,21 +73,20 @@ func (s *Site) addMain() error {
 		srcDir   string
 		fileName string
 		name     string
-		data     interface{} // TODO: not used, add additional data
 	}{
-		{"", "home", "Home Page", nil},
-		{"about", "board-members", "Board Members", nil},
-		{"about", "contact-us", "Contact Us", nil},
-		{"about", "donations", "Donations", nil},
-		{"about", "location", "Where Are We Located?", nil},
-		{"about", "mission-statement", "Mission Statement", nil},
-		{"about", "purpose-statement", "Purpose Statement", nil},
-		{"about", "volunteers", "Volunteers", nil},
-		{"events", "calendar", "Calendar", nil},
-		{"events", "sign-up", "Sign Up For Events", nil},
+		{"", "home", "Home Page"},
+		{"about", "board-members", "Board Members"},
+		{"about", "contact-us", "Contact Us"},
+		{"about", "donations", "Donations"},
+		{"about", "location", "Where Are We Located?"},
+		{"about", "mission-statement", "Mission Statement"},
+		{"about", "purpose-statement", "Purpose Statement"},
+		{"about", "volunteers", "Volunteers"},
+		{"events", "calendar", "Calendar"},
+		{"events", "sign-up", "Sign Up For Events"},
 	}
 	for _, pg := range pages {
-		if err := s.addPage(pg.name, pg.srcDir, pg.fileName+".html", pg.data); err != nil {
+		if err := s.addPage(pg.name, pg.srcDir, pg.fileName+".html", nil); err != nil {
 			return fmt.Errorf("writing page: %w", err)
 		}
 	}
@@ -236,7 +235,6 @@ func (s *Site) addPage(pageName, srcDir, srcName string, data interface{}) error
 }
 
 func (s *Site) addEvents() error {
-	// TODO href #anchor to year div s
 	if err := s.addFutureEvents(); err != nil {
 		return fmt.Errorf("adding future events: %w", err)
 	}

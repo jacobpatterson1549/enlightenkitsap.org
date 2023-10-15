@@ -1,7 +1,7 @@
 {{define "content"}}
 <div class="past events">
 {{- range .}}
-{{with .Year}}<p id="past-event-{{.}}" class="event-group">{{.}}<p>{{end}}
+{{with .Year}}<p id="year-{{.}}" class="event-group">{{.}}</p>{{end}}
 {{.Events.String}}
 {{- end}}
 </div>
