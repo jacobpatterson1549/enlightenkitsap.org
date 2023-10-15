@@ -212,7 +212,7 @@ type (
 		Name string
 		Data interface{}
 	}
-	PastEventYear struct {
+	EventGroup struct {
 		Year      string
 		Events    bytes.Buffer
 		Resources bytes.Buffer
@@ -258,11 +258,11 @@ func (s *Site) addFutureEvents() error {
 		return fmt.Errorf("futureEvents directory not found")
 	}
 	futureEntry := eventEntries[idx]
-	yr, err := s.addFolder(eventsDir, futureEntry)
+	e, err := s.createEventGroup(eventsDir, futureEntry)
 	if err != nil {
 		return fmt.Errorf("adding future events folder: %w", err)
 	}
-	if err := s.addPage("Upcoming Speakers", "events", "future-events.html", yr); err != nil {
+	if err := s.addPage("Upcoming Speakers", "events", "future-events.html", e); err != nil {
 		return fmt.Errorf("adding future events page: %w", err)
 	}
 	return err
@@ -275,9 +275,9 @@ func (s *Site) addPastEvents() error {
 		return fmt.Errorf("reading past events: %w", err)
 	}
 	slices.Reverse(yearEntries)
-	var yrs []PastEventYear
+	var yrs []EventGroup
 	for _, y := range yearEntries {
-		yr, err := s.addFolder(eventsDir, y)
+		yr, err := s.createEventGroup(eventsDir, y)
 		if err != nil {
 			return fmt.Errorf("adding events for year %v: %w", y.Name(), err)
 		}
@@ -292,7 +292,7 @@ func (s *Site) addPastEvents() error {
 	return nil
 }
 
-func (s *Site) addFolder(dir string, f fs.DirEntry) (*PastEventYear, error) {
+func (s *Site) createEventGroup(dir string, f fs.DirEntry) (*EventGroup, error) {
 	folderName := f.Name()
 	if !f.IsDir() {
 		return nil, fmt.Errorf("unexpected folder: %v", folderName)
@@ -303,23 +303,23 @@ func (s *Site) addFolder(dir string, f fs.DirEntry) (*PastEventYear, error) {
 		return nil, fmt.Errorf("reading folder: %w", err)
 	}
 	slices.Reverse(orderedFiles)
-	yr := PastEventYear{
+	eg := EventGroup{
 		Year: folderName,
 	}
 	for _, ff := range orderedFiles {
-		if err := yr.addFile(s, root, folderName, ff); err != nil {
+		if err := eg.addFile(s, root, folderName, ff); err != nil {
 			return nil, fmt.Errorf("adding file to event group: %w", err)
 		}
 	}
-	return &yr, nil
+	return &eg, nil
 }
 
-func (yr *PastEventYear) addFile(s *Site, dir, year string, ff fs.DirEntry) error {
+func (eg *EventGroup) addFile(s *Site, dir, year string, ff fs.DirEntry) error {
 	nn := ff.Name()
 	switch ext := path.Ext(nn); ext {
 	case ".html":
 		src := path.Join(dir, nn)
-		if err := yr.addEvent(src); err != nil {
+		if err := eg.addEvent(src); err != nil {
 			return fmt.Errorf("adding event: %w", err)
 		}
 	case ".jpg", ".png":
@@ -328,7 +328,7 @@ func (yr *PastEventYear) addFile(s *Site, dir, year string, ff fs.DirEntry) erro
 			return fmt.Errorf("adding resource: %w", err)
 		}
 	case ".docx", ".pdf", ".ppt", ".pptx", ".xlsx":
-		if err := yr.addResource(s, year, nn, dir); err != nil {
+		if err := eg.addResource(s, year, nn, dir); err != nil {
 			return fmt.Errorf("adding resource: %w", err)
 		}
 	default:
@@ -339,7 +339,7 @@ func (yr *PastEventYear) addFile(s *Site, dir, year string, ff fs.DirEntry) erro
 	return nil
 }
 
-func (yr *PastEventYear) addEvent(src string) error {
+func (eg *EventGroup) addEvent(src string) error {
 	data, err := siteFS.ReadFile(src)
 	if err != nil {
 		return fmt.Errorf("reading event file: %w", err)
@@ -348,8 +348,8 @@ func (yr *PastEventYear) addEvent(src string) error {
 		tmplName string
 		buf      *bytes.Buffer
 	}{
-		{"event", &yr.Events},
-		{"resources", &yr.Resources},
+		{"event", &eg.Events},
+		{"resources", &eg.Resources},
 	}
 	for _, p := range parts {
 		s := string(data)
@@ -368,7 +368,7 @@ func (yr *PastEventYear) addEvent(src string) error {
 	return nil
 }
 
-func (yr *PastEventYear) addResource(s *Site, year, name, dir string) error {
+func (eg *EventGroup) addResource(s *Site, year, name, dir string) error {
 	srcP := path.Join(dir, name)
 	b, err := siteFS.ReadFile(srcP)
 	if err != nil {
