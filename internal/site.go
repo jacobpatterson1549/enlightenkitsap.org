@@ -20,7 +20,6 @@ const (
 	perm      = 0764
 	kiloByte  = 1_000
 	kB50      = 50 * kiloByte
-	kB350     = 350 * kiloByte
 )
 
 func usage() {
@@ -97,8 +96,7 @@ func (s *Site) addMain() error {
 		dest    string
 		maxSize int
 	}{
-		// TODO: compress logo or use SVG
-		{"", "", kB350}, // root images from resources
+		{"", "", kB50}, // root images from resources
 		{"about", "board", kB50},
 	}
 	for _, img := range imageDirs {
