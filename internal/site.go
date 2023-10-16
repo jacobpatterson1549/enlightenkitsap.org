@@ -52,13 +52,13 @@ func main() {
 }
 
 func writeFiles(dest string) error {
-	if err := cleanDest(dest); err != nil {
-		return fmt.Errorf("cleaning destination directory: %w", err)
-	}
 	s := Site{
 		dest:        dest,
 		Name:        "Enl!ghten",
 		Description: "Kitsap Community Forum",
+	}
+	if err := s.cleanDest(); err != nil {
+		return fmt.Errorf("cleaning destination directory: %w", err)
 	}
 	if err := s.addMain(); err != nil {
 		return fmt.Errorf("main site pages: %w", err)
@@ -68,6 +68,27 @@ func writeFiles(dest string) error {
 	}
 	return nil
 }
+
+type (
+	Data struct {
+		Site Site
+		Page Page
+	}
+	Site struct {
+		dest        string
+		Name        string
+		Description string
+	}
+	Page struct {
+		Name string
+		Data interface{}
+	}
+	EventGroup struct {
+		Year      string
+		Events    bytes.Buffer
+		Resources bytes.Buffer
+	}
+)
 
 func (s *Site) addMain() error {
 	pages := []struct {
@@ -109,11 +130,11 @@ func (s *Site) addMain() error {
 	return nil
 }
 
-func cleanDest(dest string) error {
-	if err := os.RemoveAll(dest); err != nil && !os.IsNotExist(err) {
+func (s *Site) cleanDest() error {
+	if err := os.RemoveAll(s.dest); err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("removing old version of site: %w", err)
 	}
-	if err := os.MkdirAll(dest, perm); err != nil {
+	if err := os.MkdirAll(s.dest, perm); err != nil {
 		return fmt.Errorf("creating new site directory: %w", err)
 	}
 	return nil
@@ -124,7 +145,7 @@ func (s *Site) writeFile(srcDir, name string, data interface{}) error {
 		return fmt.Errorf("making directory: %w", err)
 	}
 	src := path.Join(resources, srcDir, name)
-	t, err := lookupMainTemplate(src)
+	t, err := s.lookupMainTemplate(src)
 	if err != nil {
 		return fmt.Errorf("looking up template: %w", err)
 	}
@@ -189,7 +210,7 @@ func (s *Site) addImage(f fs.DirEntry, src, destDir string, maxSize int) error {
 	return nil
 }
 
-func lookupMainTemplate(content string) (*template.Template, error) {
+func (s *Site) lookupMainTemplate(content string) (*template.Template, error) {
 	patterns := []string{
 		path.Join(resources, "main.html"),
 		path.Join(resources, "index.css"),
@@ -197,39 +218,18 @@ func lookupMainTemplate(content string) (*template.Template, error) {
 		path.Join(resources, "nav.css"),
 		content,
 	}
-	t := newTemplate("main.html")
+	t := s.newTemplate("main.html")
 	if _, err := t.ParseFS(siteFS, patterns...); err != nil {
 		return nil, fmt.Errorf("parsing template filesystem: %w", err)
 	}
 	return t, nil
 }
 
-func newTemplate(tmplName string) *template.Template {
+func (*Site) newTemplate(tmplName string) *template.Template {
 	t := template.New(tmplName)
 	t.Option("missingkey=error")
 	return t
 }
-
-type (
-	Data struct {
-		Site Site
-		Page Page
-	}
-	Site struct {
-		dest        string
-		Name        string
-		Description string
-	}
-	Page struct {
-		Name string
-		Data interface{}
-	}
-	EventGroup struct {
-		Year      string
-		Events    bytes.Buffer
-		Resources bytes.Buffer
-	}
-)
 
 func (s *Site) addPage(pageName, srcDir, srcName string, data interface{}) error {
 	p := Page{
@@ -331,7 +331,7 @@ func (eg *EventGroup) addFile(s *Site, dir, year string, ff fs.DirEntry) error {
 	switch ext := path.Ext(nn); ext {
 	case ".html":
 		src := path.Join(dir, nn)
-		if err := eg.addEvent(src); err != nil {
+		if err := eg.addEvent(s, src); err != nil {
 			return fmt.Errorf("adding event: %w", err)
 		}
 	case ".jpg":
@@ -351,7 +351,7 @@ func (eg *EventGroup) addFile(s *Site, dir, year string, ff fs.DirEntry) error {
 	return nil
 }
 
-func (eg *EventGroup) addEvent(src string) error {
+func (eg *EventGroup) addEvent(s *Site, src string) error {
 	data, err := siteFS.ReadFile(src)
 	if err != nil {
 		return fmt.Errorf("reading event file: %w", err)
@@ -364,9 +364,8 @@ func (eg *EventGroup) addEvent(src string) error {
 		{"resources", &eg.Resources},
 	}
 	for _, p := range parts {
-		s := string(data)
-		t := newTemplate(s)
-		if _, err := t.Parse(s); err != nil {
+		t := s.newTemplate("")
+		if _, err := t.Parse(string(data)); err != nil {
 			return fmt.Errorf("parsing event file: %w", err)
 		}
 		t = t.Lookup(p.tmplName)
