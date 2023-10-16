@@ -13,7 +13,7 @@ import (
 )
 
 //go:embed resources
-var siteFS embed.FS
+var _siteFS embed.FS
 
 const (
 	resources = "resources"
@@ -53,6 +53,11 @@ func main() {
 
 func writeFiles(dest string) error {
 	s := Site{
+		RemoveAll:   os.RemoveAll,
+		MkdirAll:    func(path string) error { return os.MkdirAll(path, perm) },
+		WriteFile:   func(name string, data []byte) error { return os.WriteFile(name, data, perm) },
+		IsNotExist:  os.IsNotExist,
+		fSys:        _siteFS,
 		dest:        dest,
 		Name:        "Enl!ghten",
 		Description: "Kitsap Community Forum",
@@ -75,9 +80,14 @@ type (
 		Page Page
 	}
 	Site struct {
+		fSys        fs.FS
 		dest        string
 		Name        string
 		Description string
+		RemoveAll   func(path string) error
+		MkdirAll    func(path string) error
+		WriteFile   func(name string, data []byte) error
+		IsNotExist  func(err error) bool
 	}
 	Page struct {
 		Name string
@@ -131,17 +141,17 @@ func (s *Site) addMain() error {
 }
 
 func (s *Site) cleanDest() error {
-	if err := os.RemoveAll(s.dest); err != nil && !os.IsNotExist(err) {
+	if err := s.RemoveAll(s.dest); err != nil && !s.IsNotExist(err) {
 		return fmt.Errorf("removing old version of site: %w", err)
 	}
-	if err := os.MkdirAll(s.dest, perm); err != nil {
+	if err := s.MkdirAll(s.dest); err != nil {
 		return fmt.Errorf("creating new site directory: %w", err)
 	}
 	return nil
 }
 
 func (s *Site) writeFile(srcDir, name string, data interface{}) error {
-	if err := os.MkdirAll(s.dest, perm); err != nil {
+	if err := s.MkdirAll(s.dest); err != nil {
 		return fmt.Errorf("making directory: %w", err)
 	}
 	src := path.Join(resources, srcDir, name)
@@ -155,18 +165,18 @@ func (s *Site) writeFile(srcDir, name string, data interface{}) error {
 	}
 	b := buf.Bytes()
 	dest := path.Join(s.dest, name)
-	if err := os.WriteFile(dest, b, perm); err != nil {
+	if err := s.WriteFile(dest, b); err != nil {
 		return fmt.Errorf("writing template: %w", err)
 	}
 	return nil
 }
 
 func (s *Site) addImages(srcDir, destDir string, maxSize int) error {
-	entries, err := siteFS.ReadDir(srcDir)
+	entries, err := fs.ReadDir(s.fSys, srcDir)
 	if err != nil {
 		return fmt.Errorf("reading image directory: %w", err)
 	}
-	if err := os.MkdirAll(destDir, perm); err != nil {
+	if err := s.MkdirAll(destDir); err != nil {
 		return fmt.Errorf("creating image directory: %w", err)
 	}
 	for _, f := range entries {
@@ -192,7 +202,7 @@ func (s *Site) addImage(f fs.DirEntry, src, destDir string, maxSize int) error {
 	}
 	n := f.Name()
 	srcP := path.Join(src, n)
-	b, err := siteFS.ReadFile(srcP)
+	b, err := fs.ReadFile(s.fSys, srcP)
 	if len(b) > maxSize && maxSize > 0 {
 		return fmt.Errorf("image %q larger than %v bytes", n, maxSize)
 	}
@@ -200,11 +210,11 @@ func (s *Site) addImage(f fs.DirEntry, src, destDir string, maxSize int) error {
 		return fmt.Errorf("reading image: %w", err)
 	}
 	dest := path.Join(s.dest, destDir)
-	if err := os.MkdirAll(dest, perm); err != nil {
+	if err := s.MkdirAll(dest); err != nil {
 		return fmt.Errorf("making directory: %w", err)
 	}
 	destP := path.Join(dest, n)
-	if err := os.WriteFile(destP, b, perm); err != nil {
+	if err := s.WriteFile(destP, b); err != nil {
 		return fmt.Errorf("writing image: %w", err)
 	}
 	return nil
@@ -219,7 +229,7 @@ func (s *Site) lookupMainTemplate(content string) (*template.Template, error) {
 		content,
 	}
 	t := s.newTemplate("main.html")
-	if _, err := t.ParseFS(siteFS, patterns...); err != nil {
+	if _, err := t.ParseFS(s.fSys, patterns...); err != nil {
 		return nil, fmt.Errorf("parsing template filesystem: %w", err)
 	}
 	return t, nil
@@ -258,7 +268,7 @@ func (s *Site) addEvents() error {
 
 func (s *Site) addFutureEvents() error {
 	eventsDir := path.Join(resources, "events")
-	eventEntries, err := fs.ReadDir(siteFS, eventsDir)
+	eventEntries, err := fs.ReadDir(s.fSys, eventsDir)
 	if err != nil {
 		return fmt.Errorf("reading events: %w", err)
 	}
@@ -282,7 +292,7 @@ func (s *Site) addFutureEvents() error {
 
 func (s *Site) addPastEvents() error {
 	eventsDir := path.Join(resources, "events", "past")
-	yearEntries, err := siteFS.ReadDir(eventsDir)
+	yearEntries, err := fs.ReadDir(s.fSys, eventsDir)
 	if err != nil {
 		return fmt.Errorf("reading past events: %w", err)
 	}
@@ -310,7 +320,7 @@ func (s *Site) createEventGroup(dir string, f fs.DirEntry) (*EventGroup, error) 
 		return nil, fmt.Errorf("unexpected folder: %v", folderName)
 	}
 	root := path.Join(dir, folderName)
-	orderedFiles, err := siteFS.ReadDir(root)
+	orderedFiles, err := fs.ReadDir(s.fSys, root)
 	if err != nil {
 		return nil, fmt.Errorf("reading folder: %w", err)
 	}
@@ -352,7 +362,7 @@ func (eg *EventGroup) addFile(s *Site, dir, year string, ff fs.DirEntry) error {
 }
 
 func (eg *EventGroup) addEvent(s *Site, src string) error {
-	data, err := siteFS.ReadFile(src)
+	data, err := fs.ReadFile(s.fSys, src)
 	if err != nil {
 		return fmt.Errorf("reading event file: %w", err)
 	}
@@ -381,17 +391,17 @@ func (eg *EventGroup) addEvent(s *Site, src string) error {
 
 func (eg *EventGroup) addResource(s *Site, year, name, dir string) error {
 	srcP := path.Join(dir, name)
-	b, err := siteFS.ReadFile(srcP)
+	b, err := fs.ReadFile(s.fSys, srcP)
 	if err != nil {
 		return fmt.Errorf("reading resource: %w", err)
 	}
 	dest := path.Join("resources", "events", year)
 	destP := path.Join(s.dest, dest)
-	if err := os.MkdirAll(destP, perm); err != nil {
+	if err := s.MkdirAll(destP); err != nil {
 		return fmt.Errorf("making directory: %w", err)
 	}
 	destF := path.Join(destP, name)
-	if err := os.WriteFile(destF, b, perm); err != nil {
+	if err := s.WriteFile(destF, b); err != nil {
 		return fmt.Errorf("writing resource: %w", err)
 	}
 	return nil
