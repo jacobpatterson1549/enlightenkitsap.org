@@ -18,7 +18,9 @@ var siteFS embed.FS
 const (
 	resources = "resources"
 	perm      = 0764
-	kB100     = 50 * 1_000
+	kiloByte  = 1_000
+	kB50      = 50 * kiloByte
+	kB350     = 350 * kiloByte
 )
 
 func usage() {
@@ -91,16 +93,18 @@ func (s *Site) addMain() error {
 		}
 	}
 	imageDirs := []struct {
-		src  string
-		dest string
+		src     string
+		dest    string
+		maxSize int
 	}{
-		{"", ""}, // root images from resources
-		{"about", "board"},
+		// TODO: compress logo or use SVG
+		{"", "", kB350}, // root images from resources
+		{"about", "board", kB50},
 	}
 	for _, img := range imageDirs {
 		src := path.Join(resources, img.src, "images")
-		dest := path.Join(s.dest, "images", img.dest)
-		if err := addImages(src, dest); err != nil {
+		destDir := path.Join("images", img.dest)
+		if err := s.addImages(src, destDir, img.maxSize); err != nil {
 			return fmt.Errorf("adding images from: %w", err)
 		}
 	}
@@ -138,23 +142,32 @@ func (s *Site) writeFile(srcDir, name string, data interface{}) error {
 	return nil
 }
 
-func addImages(src, dest string) error {
-	entries, err := siteFS.ReadDir(src)
+func (s *Site) addImages(srcDir, destDir string, maxSize int) error {
+	entries, err := siteFS.ReadDir(srcDir)
 	if err != nil {
 		return fmt.Errorf("reading image directory: %w", err)
 	}
-	if err := os.MkdirAll(dest, perm); err != nil {
+	if err := os.MkdirAll(destDir, perm); err != nil {
 		return fmt.Errorf("creating image directory: %w", err)
 	}
 	for _, f := range entries {
-		if err := addImage(f, src, dest, 0); err != nil {
-			return fmt.Errorf("adding image: %w", err)
+		nn := f.Name()
+		if f.IsDir() {
+			return fmt.Errorf("unexpected directory for images: %q", nn)
+		}
+		switch ext := path.Ext(nn); ext {
+		case ".png", ".jpg":
+			if err := s.addImage(f, srcDir, destDir, maxSize); err != nil {
+				return fmt.Errorf("adding image: %w", err)
+			}
+		default:
+			return fmt.Errorf("unexpected image extension: %q (%q)", ext, nn)
 		}
 	}
 	return nil
 }
 
-func addImage(f fs.DirEntry, src, dest string, maxSize int) error {
+func (s *Site) addImage(f fs.DirEntry, src, destDir string, maxSize int) error {
 	if f.IsDir() {
 		return fmt.Errorf("will not read directory from image folder")
 	}
@@ -167,6 +180,7 @@ func addImage(f fs.DirEntry, src, dest string, maxSize int) error {
 	if err != nil {
 		return fmt.Errorf("reading image: %w", err)
 	}
+	dest := path.Join(s.dest, destDir)
 	if err := os.MkdirAll(dest, perm); err != nil {
 		return fmt.Errorf("making directory: %w", err)
 	}
@@ -322,9 +336,9 @@ func (eg *EventGroup) addFile(s *Site, dir, year string, ff fs.DirEntry) error {
 		if err := eg.addEvent(src); err != nil {
 			return fmt.Errorf("adding event: %w", err)
 		}
-	case ".jpg", ".png":
-		dest := path.Join(s.dest, "images", "events", year)
-		if err := addImage(ff, dir, dest, kB100); err != nil {
+	case ".jpg":
+		destDir := path.Join("images", "events", year)
+		if err := s.addImage(ff, dir, destDir, kB50); err != nil {
 			return fmt.Errorf("adding resource: %w", err)
 		}
 	case ".docx", ".pdf", ".ppt", ".pptx", ".xlsx":
