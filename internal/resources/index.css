@@ -48,15 +48,14 @@ nav {
 }
 
 header .banner {
-	max-width: 50vw;
+	max-width: 70vw;
 	display:inline-block;
-	margin: 4em;
-	padding: 2em;
+	margin: min(4em, 10vw);
+	padding: min(2em, 5vw);
 }
 
-h1 a,
-nav a,
-header {
+nav *,
+header * {
 	color: #fff;
 	text-decoration: unset;
 }
@@ -71,6 +70,8 @@ h2 {
 
 nav {
 	text-transform: uppercase;
+	position: sticky;
+	top: 0;
 }
 
 h3 {
