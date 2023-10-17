@@ -26,8 +26,7 @@ func usage() {
 
 // delete this section when debugging
 func main() {
-	var dest string
-	flag.StringVar(&dest, "dest", "", "the location to save the site files to")
+	dest := flag.String("dest", "", "the location to save the site files to")
 	flag.Usage = usage
 	flag.Parse()
 
@@ -35,12 +34,12 @@ func main() {
 	// to debug the compilation of the site's web pages:
 	// func WriteSite(dest string) {
 
-	if len(dest) == 0 {
+	if len(*dest) == 0 {
 		flag.Usage()
 		os.Exit(2)
 	}
 
-	if err := writeFiles(dest); err != nil {
+	if err := writeFiles(*dest); err != nil {
 		fmt.Fprintf(os.Stderr, "generating site: %v\n", err)
 		os.Exit(1)
 	}

@@ -94,8 +94,8 @@ func (s *Site) createFile(srcDir, name string, data interface{}) error {
 	if err != nil {
 		return fmt.Errorf("looking up template: %w", err)
 	}
-	var buf bytes.Buffer
-	if err := t.Execute(&buf, data); err != nil {
+	buf := new(bytes.Buffer)
+	if err := t.Execute(buf, data); err != nil {
 		return fmt.Errorf("executing template: %w", err)
 	}
 	b := buf.Bytes()
@@ -232,7 +232,7 @@ func (s *Site) addPastEvents() error {
 		return fmt.Errorf("reading past events: %w", err)
 	}
 	slices.Reverse(yearEntries)
-	var yrs []EventGroup
+	yrs := make([]EventGroup, 0, len(yearEntries))
 	for _, y := range yearEntries {
 		yr, err := s.createEventGroup(eventsDir, y)
 		if err != nil {
@@ -260,23 +260,22 @@ func (s *Site) createEventGroup(dir string, f fs.DirEntry) (*EventGroup, error) 
 		return nil, fmt.Errorf("reading folder: %w", err)
 	}
 	slices.Reverse(orderedFiles)
-	eg := EventGroup{
-		Year: folderName,
-	}
+	eg := new(EventGroup)
+	eg.Year = folderName
 	for _, ff := range orderedFiles {
-		if err := eg.addFile(s, root, folderName, ff); err != nil {
+		if err := s.addFile(eg, root, folderName, ff); err != nil {
 			return nil, fmt.Errorf("adding file to event group: %w", err)
 		}
 	}
-	return &eg, nil
+	return eg, nil
 }
 
-func (eg *EventGroup) addFile(s *Site, dir, year string, ff fs.DirEntry) error {
+func (s *Site) addFile(eg *EventGroup, dir, year string, ff fs.DirEntry) error {
 	nn := ff.Name()
 	switch ext := path.Ext(nn); ext {
 	case ".html":
 		src := path.Join(dir, nn)
-		if err := eg.addEvent(s, src); err != nil {
+		if err := s.addEvent(eg, src); err != nil {
 			return fmt.Errorf("adding event: %w", err)
 		}
 	case ".jpg":
@@ -285,7 +284,7 @@ func (eg *EventGroup) addFile(s *Site, dir, year string, ff fs.DirEntry) error {
 			return fmt.Errorf("adding resource: %w", err)
 		}
 	case ".docx", ".pdf", ".ppt", ".pptx", ".xlsx":
-		if err := eg.addResource(s, year, nn, dir); err != nil {
+		if err := s.addResource(year, nn, dir); err != nil {
 			return fmt.Errorf("adding resource: %w", err)
 		}
 	default:
@@ -296,7 +295,7 @@ func (eg *EventGroup) addFile(s *Site, dir, year string, ff fs.DirEntry) error {
 	return nil
 }
 
-func (eg *EventGroup) addEvent(s *Site, src string) error {
+func (s *Site) addEvent(eg *EventGroup, src string) error {
 	data, err := fs.ReadFile(s.fSys, src)
 	if err != nil {
 		return fmt.Errorf("reading event file: %w", err)
@@ -324,7 +323,7 @@ func (eg *EventGroup) addEvent(s *Site, src string) error {
 	return nil
 }
 
-func (eg *EventGroup) addResource(s *Site, year, name, dir string) error {
+func (s *Site) addResource(year, name, dir string) error {
 	srcP := path.Join(dir, name)
 	b, err := fs.ReadFile(s.fSys, srcP)
 	if err != nil {
