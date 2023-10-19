@@ -85,27 +85,6 @@ func (s *Site) cleanDest() error {
 	return nil
 }
 
-func (s *Site) createFile(srcDir, name string, data interface{}) error {
-	if err := s.mkdirAll(s.dest); err != nil {
-		return fmt.Errorf("making directory: %w", err)
-	}
-	src := path.Join(resources, srcDir, name)
-	t, err := s.lookupMainTemplate(src)
-	if err != nil {
-		return fmt.Errorf("looking up template: %w", err)
-	}
-	buf := new(bytes.Buffer)
-	if err := t.Execute(buf, data); err != nil {
-		return fmt.Errorf("executing template: %w", err)
-	}
-	b := buf.Bytes()
-	dest := path.Join(s.dest, name)
-	if err := s.writeFile(dest, b); err != nil {
-		return fmt.Errorf("writing template: %w", err)
-	}
-	return nil
-}
-
 func (s *Site) addImages(srcDir, destDir string, maxSize int) error {
 	entries, err := fs.ReadDir(s.fSys, srcDir)
 	if err != nil {
@@ -155,6 +134,42 @@ func (s *Site) addImage(f fs.DirEntry, src, destDir string, maxSize int) error {
 	return nil
 }
 
+func (s *Site) addPage(pageName, srcDir, srcName string, data interface{}) error {
+	p := Page{
+		Name: pageName,
+		Data: data,
+	}
+	tmplData := Data{
+		Site: *s,
+		Page: p,
+	}
+	if err := s.addFile(srcDir, srcName, tmplData); err != nil {
+		return fmt.Errorf("writing file %v, %w", srcName, err)
+	}
+	return nil
+}
+
+func (s *Site) addFile(srcDir, name string, data interface{}) error {
+	if err := s.mkdirAll(s.dest); err != nil {
+		return fmt.Errorf("making directory: %w", err)
+	}
+	src := path.Join(resources, srcDir, name)
+	t, err := s.lookupMainTemplate(src)
+	if err != nil {
+		return fmt.Errorf("looking up template: %w", err)
+	}
+	buf := new(bytes.Buffer)
+	if err := t.Execute(buf, data); err != nil {
+		return fmt.Errorf("executing template: %w", err)
+	}
+	b := buf.Bytes()
+	dest := path.Join(s.dest, name)
+	if err := s.writeFile(dest, b); err != nil {
+		return fmt.Errorf("writing template: %w", err)
+	}
+	return nil
+}
+
 func (s *Site) lookupMainTemplate(content string) (*template.Template, error) {
 	patterns := []string{
 		path.Join(resources, "main.html"),
@@ -174,21 +189,6 @@ func (*Site) newTemplate(tmplName string) *template.Template {
 	t := template.New(tmplName)
 	t.Option("missingkey=error")
 	return t
-}
-
-func (s *Site) addPage(pageName, srcDir, srcName string, data interface{}) error {
-	p := Page{
-		Name: pageName,
-		Data: data,
-	}
-	tmplData := Data{
-		Site: *s,
-		Page: p,
-	}
-	if err := s.createFile(srcDir, srcName, tmplData); err != nil {
-		return fmt.Errorf("writing file %v, %w", srcName, err)
-	}
-	return nil
 }
 
 func (s *Site) addEvents() error {
@@ -263,14 +263,14 @@ func (s *Site) createEventGroup(dir string, f fs.DirEntry) (*EventGroup, error) 
 	eg := new(EventGroup)
 	eg.Year = folderName
 	for _, ff := range orderedFiles {
-		if err := s.addFile(eg, root, folderName, ff); err != nil {
+		if err := s.addEventFile(eg, root, folderName, ff); err != nil {
 			return nil, fmt.Errorf("adding file to event group: %w", err)
 		}
 	}
 	return eg, nil
 }
 
-func (s *Site) addFile(eg *EventGroup, dir, year string, ff fs.DirEntry) error {
+func (s *Site) addEventFile(eg *EventGroup, dir, year string, ff fs.DirEntry) error {
 	nn := ff.Name()
 	switch ext := path.Ext(nn); ext {
 	case ".html":
