@@ -27,13 +27,13 @@ main {
 body {
 	margin: 0;
 	text-align: center;
-	background-color: #fff;;
+	background-color: #fff;
 }
 
 footer {
 	background-color: #262626;
 	margin-top: 5em;
-	min-height: 150px;;
+	min-height: 150px;
 }
 
 header {
@@ -49,7 +49,7 @@ nav {
 
 header .banner {
 	max-width: 70vw;
-	display:inline-block;
+	display: inline-block;
 	margin: min(4em, 10vw);
 	padding: min(2em, 5vw);
 }
@@ -148,7 +148,7 @@ iframe {
 	text-align: left;
 }
 
-@media screen and (min-width: 900px) {
+@media screen and (min-width: 600px) {
 	.resource iframe[src^="https://www.youtu"] {
 		width: 676px;
 	}

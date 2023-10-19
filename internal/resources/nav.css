@@ -3,7 +3,7 @@ label[for="menu-cb"] {
 }
 
 label[for="menu-cb"],
-nav a {
+.menu a {
 	display: block;
 	padding: 0.3em;
 	text-align: left;
@@ -22,7 +22,7 @@ nav a:hover {
 .banner :nth-child(2):before {
 	content: '';
 	width: 40%;
-	display:block;
+	display: block;
 	margin: 5% auto;
 	border-top: solid;
 }
@@ -32,14 +32,16 @@ nav a:hover {
 	display: none;
 }
 
-@media screen and (min-width: 900px) {
-	label[for="menu-cb"] {
-		display: none;
+@media screen and (min-width: 600px) {
+
+	.menu-toggle:not(:checked)+.menu,
+	.menu .item:not(.dropdown) a,
+	.menu .item {
+		display: inline-block;
 	}
 
-	.menu>*,
-	.menu-toggle:not(:checked)+.menu {
-		display: inline-block;
+	label[for="menu-cb"] {
+		display: none;
 	}
 
 	.dropdown-content {
