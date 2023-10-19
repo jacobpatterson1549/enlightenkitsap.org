@@ -3,9 +3,11 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/fs"
 	"path"
 	"slices"
+	"strings"
 	"text/template"
 )
 
@@ -159,7 +161,7 @@ func (s *Site) addFile(srcDir, name string, data interface{}) error {
 		return fmt.Errorf("looking up template: %w", err)
 	}
 	buf := new(bytes.Buffer)
-	if err := t.Execute(buf, data); err != nil {
+	if err := s.executeTemplate(buf, t, data); err != nil {
 		return fmt.Errorf("executing template: %w", err)
 	}
 	b := buf.Bytes()
@@ -189,6 +191,20 @@ func (*Site) newTemplate(tmplName string) *template.Template {
 	t := template.New(tmplName)
 	t.Option("missingkey=error")
 	return t
+}
+
+func (*Site) executeTemplate(w io.Writer, t *template.Template, data interface{}) error {
+	sb := new(strings.Builder)
+	if err := t.Execute(sb, data); err != nil {
+		return fmt.Errorf("executing template to buffer: %w", err)
+	}
+	got := sb.String()
+	thin := strings.TrimSpace(got)
+	r := strings.NewReader(thin)
+	if _, err := r.WriteTo(w); err != nil {
+		return fmt.Errorf("executing template buffer to target: %w", err)
+	}
+	return nil
 }
 
 func (s *Site) addEvents() error {
@@ -316,7 +332,7 @@ func (s *Site) addEvent(eg *EventGroup, src string) error {
 		if t == nil {
 			return fmt.Errorf("no template named %q in %v", p.tmplName, src)
 		}
-		if err := t.Execute(p.buf, nil); err != nil {
+		if err := s.executeTemplate(p.buf, t, nil); err != nil {
 			return fmt.Errorf("executing template: %w", err)
 		}
 	}
