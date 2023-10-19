@@ -19,6 +19,14 @@ nav a:hover {
 	outline-width: 3px;
 }
 
+.banner :nth-child(2):before {
+	content: '';
+	width: 40%;
+	display:block;
+	margin: 5% auto;
+	border-top: solid;
+}
+
 .menu-toggle:not(:checked)+.menu,
 .menu-toggle {
 	display: none;
