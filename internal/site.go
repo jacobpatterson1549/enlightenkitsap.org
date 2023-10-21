@@ -259,9 +259,6 @@ func (s *Site) addPastEvents() error {
 	if err := s.addPage("Past Events", "events", "past-events.html", yrs); err != nil {
 		return fmt.Errorf("adding past events page: %w", err)
 	}
-	if err := s.addPage("Videos & Resources", "events", "videos-and-resources.html", yrs); err != nil {
-		return fmt.Errorf("adding past events resources: %w", err)
-	}
 	return nil
 }
 
@@ -401,7 +398,9 @@ func (s *Site) addEventResourcesPage(destP, resourceName string, resourcesBuf *b
 	content := new(bytes.Buffer)
 	content.WriteString(`{{define "content"}}`)
 	resourcesBuf.WriteTo(content)
-	content.WriteString(`<a class="left" href="javascript:history.back()">back</a>`)
+	content.WriteString(`<div class="left">`)
+	content.WriteString(`<a href="javascript:history.back()">back</a>`)
+	content.WriteString(`</div>`)
 	content.WriteString(`{{end}}`)
 	contentTmpl := content.String()
 
