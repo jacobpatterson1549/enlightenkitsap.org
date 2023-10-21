@@ -19,7 +19,7 @@
 
 	<header>
 		<div class="banner">
-			<h1><a href=".">{{.Site.Name}}</a></h1>
+			<h1><a href="/">{{.Site.Name}}</a></h1>
 			<h2>{{.Site.Description}}</h2>
 		</div>
 	</header>
@@ -27,7 +27,7 @@
 
 	<main>
 		<h3>{{.Page.Name}}</h3>
-		<img src="images/enlighten-logo.png" alt="{{.Site.Name}} logo with words" class="inline logo">
+		<img src="/images/enlighten-logo.png" alt="{{.Site.Name}} logo with words" class="inline logo">
 		{{- template "content" .Page.Data}}
 	</main>
 
