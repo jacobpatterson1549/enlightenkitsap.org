@@ -290,8 +290,7 @@ func (s *Site) addEventFile(eg *EventGroup, dir, year string, ff fs.DirEntry) er
 	nn := ff.Name()
 	switch ext := path.Ext(nn); ext {
 	case ".html":
-		src := path.Join(dir, nn)
-		if err := s.addEvent(eg, src); err != nil {
+		if err := s.addEvent(eg, dir, nn, year); err != nil {
 			return fmt.Errorf("adding event: %w", err)
 		}
 	case ".jpg":
@@ -300,7 +299,7 @@ func (s *Site) addEventFile(eg *EventGroup, dir, year string, ff fs.DirEntry) er
 			return fmt.Errorf("adding resource: %w", err)
 		}
 	case ".docx", ".pdf", ".ppt", ".pptx", ".xlsx":
-		if err := s.addResource(year, nn, dir); err != nil {
+		if err := s.addResourceFile(year, nn, dir); err != nil {
 			return fmt.Errorf("adding resource: %w", err)
 		}
 	default:
@@ -311,7 +310,8 @@ func (s *Site) addEventFile(eg *EventGroup, dir, year string, ff fs.DirEntry) er
 	return nil
 }
 
-func (s *Site) addEvent(eg *EventGroup, src string) error {
+func (s *Site) addEvent(eg *EventGroup, dir, eventHtmlName, year string) error {
+	src := path.Join(dir, eventHtmlName)
 	data, err := fs.ReadFile(s.fSys, src)
 	if err != nil {
 		return fmt.Errorf("reading event file: %w", err)
@@ -321,7 +321,7 @@ func (s *Site) addEvent(eg *EventGroup, src string) error {
 		buf      *bytes.Buffer
 	}{
 		{"event", &eg.Events},
-		{"resources", &eg.Resources},
+		{"resources", new(bytes.Buffer)},
 	}
 	for _, p := range parts {
 		t := s.newTemplate("")
@@ -332,14 +332,21 @@ func (s *Site) addEvent(eg *EventGroup, src string) error {
 		if t == nil {
 			return fmt.Errorf("no template named %q in %v", p.tmplName, src)
 		}
+		beforeLen := p.buf.Len()
 		if err := s.executeTemplate(p.buf, t, nil); err != nil {
 			return fmt.Errorf("executing template: %w", err)
+		}
+		afterLen := p.buf.Len()
+		if p.tmplName == "resources" && beforeLen != afterLen {
+			if err := s.addResourcesLink(year, eventHtmlName, &eg.Events, p.buf); err != nil {
+				return fmt.Errorf("adding resources link: %w", err)
+			}
 		}
 	}
 	return nil
 }
 
-func (s *Site) addResource(year, name, dir string) error {
+func (s *Site) addResourceFile(year, name, dir string) error {
 	srcP := path.Join(dir, name)
 	b, err := fs.ReadFile(s.fSys, srcP)
 	if err != nil {
@@ -353,6 +360,86 @@ func (s *Site) addResource(year, name, dir string) error {
 	destF := path.Join(destP, name)
 	if err := s.writeFile(destF, b); err != nil {
 		return fmt.Errorf("writing resource: %w", err)
+	}
+	return nil
+}
+
+func (s *Site) addResourcesLink(year, eventHtmlName string, eventBuf, resourcesBuf *bytes.Buffer) error {
+	dest := path.Join(resources, "events", year) // TODO: add "events" constant
+	destP := path.Join(s.dest, dest)
+	resourceName := path.Join(destP, eventHtmlName)
+	linkHref := path.Join(dest, eventHtmlName)
+	if err := s.addEventResourcesPage(destP, resourceName, resourcesBuf); err != nil {
+		return fmt.Errorf("adding event resources page: %w", err)
+	}
+	if err := s.addEventResourcesLink(linkHref, eventBuf); err != nil {
+		return fmt.Errorf("adding event resources link: %w", err)
+	}
+	return nil
+}
+
+func (s *Site) addEventResourcesPage(destP, resourceName string, resourcesBuf *bytes.Buffer) error {
+	if err := s.mkdirAll(destP); err != nil {
+		return fmt.Errorf("making directory: %w", err)
+	}
+	// t, err := s.lookupMainTemplate("")
+	// if err != nil {
+	// 	return fmt.Errorf("looking event resources template: %w", err)
+	// }
+	// TODO: this next chunk is a copy from lookupMainTemplate().  fix the duplication
+	patterns := []string{
+		path.Join(resources, "main.html"),
+		path.Join(resources, "index.css"),
+		path.Join(resources, "nav.html"),
+		path.Join(resources, "nav.css"),
+	}
+	t := s.newTemplate("main.html")
+	if _, err := t.ParseFS(s.fSys, patterns...); err != nil {
+		return fmt.Errorf("parsing main template filesystem: %w", err)
+	}
+
+	content := new(bytes.Buffer)
+	content.WriteString(`{{define "content"}}`)
+	resourcesBuf.WriteTo(content)
+	content.WriteString(`<a class="left" href="javascript:history.back()">back</a>`)
+	content.WriteString(`{{end}}`)
+	contentTmpl := content.String()
+
+	if _, err := t.Parse(contentTmpl); err != nil {
+		return fmt.Errorf("parsing content template: %w", err)
+	}
+	buf2 := new(bytes.Buffer)
+	// TODO: this is similar to Site.addPage()
+	p := Page{
+		Name: "Videos/Resources for Event",
+	}
+	tmplData := Data{
+		Site: *s,
+		Page: p,
+	}
+	if err := s.executeTemplate(buf2, t, tmplData); err != nil {
+		return fmt.Errorf("writing resources info template: %w", err)
+	}
+	data := buf2.Bytes()
+	if err := s.writeFile(resourceName, data); err != nil {
+		return fmt.Errorf("writing resources file for event: %w", err)
+	}
+	return nil
+}
+
+func (s *Site) addEventResourcesLink(linkHref string, eventBuf *bytes.Buffer) error {
+	// TODO: cache the link template
+	eventLinkPath := path.Join(resources, "events", "past-events.html")
+	t := s.newTemplate("")
+	if _, err := t.ParseFS(s.fSys, eventLinkPath); err != nil {
+		return fmt.Errorf("parsing event resources link template: %w", err)
+	}
+	t = t.Lookup("event-resource-link")
+	if t == nil {
+		return fmt.Errorf("event-resource-link template not found")
+	}
+	if err := s.executeTemplate(eventBuf, t, linkHref); err != nil {
+		return fmt.Errorf("writing event link template: %w", err)
 	}
 	return nil
 }
