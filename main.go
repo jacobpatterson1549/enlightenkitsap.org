@@ -12,10 +12,10 @@ import (
 //go:embed build/site
 var _siteFS embed.FS
 
-//go:generate go run enlightenkitsap.org/internal -dest=build/site
+//go:generate go run enlightenkitsap.org/internal -dest=build/site -one-resource=false
 func main() {
 	// uncomment the line below to debug compilation of the site:
-	// internal.WriteSite("build/site")
+	// internal.Config{Dest: "build/site", OneResource: true}.WriteSite()
 
 	cfg := new(config)
 	if err := cfg.parseArgsAndEnv(os.Stdout, os.Args...); err != nil {

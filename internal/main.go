@@ -24,30 +24,37 @@ func usage() {
 	fmt.Fprintln(os.Stderr, "Warning: Overwrites the previous site")
 }
 
+type Config struct {
+	Dest        string
+	OneResource bool
+}
+
 // delete this section when debugging
 func main() {
-	dest := flag.String("dest", "", "the location to save the site files to")
+	var cfg Config
+	flag.StringVar(&cfg.Dest, "dest", "", "the location to save the site files to")
+	flag.BoolVar(&cfg.OneResource, "one-resource", false, "show all videos and resources on one page")
 	flag.Usage = usage
 	flag.Parse()
-
-	// uncomment the line below and change the package name to "internal"
-	// to debug the compilation of the site's web pages:
-	// func WriteSite(dest string) {
-
-	if len(*dest) == 0 {
+	if len(cfg.Dest) == 0 {
 		flag.Usage()
 		os.Exit(2)
 	}
 
-	if err := writeFiles(*dest); err != nil {
+	// uncomment the line below and change the package name to "internal"
+	// to debug the compilation of the site's web pages:
+	// func (cfg Config) WriteSite() {
+
+	if err := writeFiles(cfg.Dest, cfg.OneResource); err != nil {
 		fmt.Fprintf(os.Stderr, "generating site: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func writeFiles(dest string) error {
+func writeFiles(dest string, oneResource bool) error {
 	s := Site{
 		removeAll:   os.RemoveAll,
+		OneResource: oneResource,
 		mkdirAll:    func(path string) error { return os.MkdirAll(path, perm) },
 		writeFile:   func(name string, data []byte) error { return os.WriteFile(name, data, perm) },
 		isNotExist:  os.IsNotExist,

@@ -148,6 +148,10 @@ iframe {
 	text-align: left;
 }
 
+.event {
+	margin-top: 5em;
+}
+
 @media screen and (min-width: 600px) {
 	.resource iframe[src^="https://www.youtu"] {
 		width: 676px;
