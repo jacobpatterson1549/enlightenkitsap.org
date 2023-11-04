@@ -45,15 +45,15 @@ func (s *Site) addMain() error {
 		name     string
 	}{
 		{"", "home", "Home Page"},
-		{"about", "board-members", "Board Members"},
-		{"about", "contact-us", "Contact Us"},
-		{"about", "donations", "Donations"},
-		{"about", "location", "Where Are We Located?"},
-		{"about", "mission-statement", "Mission Statement"},
-		{"about", "purpose-statement", "Purpose Statement"},
-		{"about", "volunteers", "Volunteers"},
-		{"events", "calendar", "Calendar"},
-		{"events", "sign-up", "Sign Up For Events"},
+		{about, "board-members", "Board Members"},
+		{about, "contact-us", "Contact Us"},
+		{about, "donations", "Donations"},
+		{about, "location", "Where Are We Located?"},
+		{about, "mission-statement", "Mission Statement"},
+		{about, "purpose-statement", "Purpose Statement"},
+		{about, "volunteers", "Volunteers"},
+		{events, "calendar", "Calendar"},
+		{events, "sign-up", "Sign Up For Events"},
 	}
 	for _, pg := range pages {
 		if err := s.addPage(pg.name, pg.srcDir, pg.fileName+".html", nil); err != nil {
@@ -66,7 +66,7 @@ func (s *Site) addMain() error {
 		maxSize int
 	}{
 		{"", "", kB50}, // root images from resources
-		{"about", "board", kB50},
+		{about, "board", kB50},
 	}
 	for _, img := range imageDirs {
 		src := path.Join(resources, img.src, "images")
@@ -235,7 +235,7 @@ func (s *Site) addEvents() error {
 }
 
 func (s *Site) addFutureEvents() error {
-	eventsDir := path.Join(resources, "events")
+	eventsDir := path.Join(resources, events)
 	eventEntries, err := fs.ReadDir(s.fSys, eventsDir)
 	if err != nil {
 		return fmt.Errorf("reading events: %w", err)
@@ -252,14 +252,14 @@ func (s *Site) addFutureEvents() error {
 	if err != nil {
 		return fmt.Errorf("adding future events folder: %w", err)
 	}
-	if err := s.addPage("Upcoming Speakers", "events", "future-events.html", e); err != nil {
+	if err := s.addPage("Upcoming Speakers", events, "future-events.html", e); err != nil {
 		return fmt.Errorf("adding future events page: %w", err)
 	}
 	return err
 }
 
 func (s *Site) addPastEvents() error {
-	eventsDir := path.Join(resources, "events", "past")
+	eventsDir := path.Join(resources, events, "past")
 	yearEntries, err := fs.ReadDir(s.fSys, eventsDir)
 	if err != nil {
 		return fmt.Errorf("reading past events: %w", err)
@@ -273,11 +273,11 @@ func (s *Site) addPastEvents() error {
 		}
 		yrs = append(yrs, *yr)
 	}
-	if err := s.addPage("Past Events", "events", "past-events.html", yrs); err != nil {
+	if err := s.addPage("Past Events", events, "past-events.html", yrs); err != nil {
 		return fmt.Errorf("adding past events page: %w", err)
 	}
 	if s.OneResource {
-		if err := s.addPage("Videos & Resources", "events", "videos-and-resources.html", yrs); err != nil {
+		if err := s.addPage("Videos & Resources", events, "videos-and-resources.html", yrs); err != nil {
 			return fmt.Errorf("adding past events resources: %w", err)
 		}
 	}
@@ -313,7 +313,7 @@ func (s *Site) addEventFile(eg *EventGroup, dir, year string, ff fs.DirEntry) er
 			return fmt.Errorf("adding event: %w", err)
 		}
 	case ".jpg":
-		destDir := path.Join("images", "events", year)
+		destDir := path.Join("images", events, year)
 		if err := s.addImage(ff, dir, destDir, kB50); err != nil {
 			return fmt.Errorf("adding resource: %w", err)
 		}
@@ -390,7 +390,7 @@ func (s *Site) addResourceFile(year, name, dir string) error {
 }
 
 func (s *Site) addResourcesLink(year, eventHtmlName string, eventBuf, resourcesBuf *bytes.Buffer) error {
-	dest := path.Join(resources, "events", year) // TODO: add "events" constant
+	dest := path.Join(resources, events, year)
 	destP := path.Join(s.dest, dest)
 	resourceName := path.Join(destP, eventHtmlName)
 	linkHref := path.Join(dest, eventHtmlName)
@@ -456,7 +456,7 @@ func (s *Site) addEventResourcesPage(destP, resourceName string, resourcesBuf *b
 
 func (s *Site) addEventResourcesLink(linkHref string, eventBuf *bytes.Buffer) error {
 	// TODO: cache the link template
-	eventLinkPath := path.Join(resources, "events", "past-events.html")
+	eventLinkPath := path.Join(resources, events, "past-events.html")
 	t := s.newTemplate("")
 	if _, err := t.ParseFS(s.fSys, eventLinkPath); err != nil {
 		return fmt.Errorf("parsing event resources link template: %w", err)

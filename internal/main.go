@@ -12,6 +12,8 @@ var _siteFS embed.FS
 
 const (
 	resources = "resources"
+	events    = "events"
+	about     = "about"
 	perm      = 0764
 	kiloByte  = 1_000
 	kB50      = 50 * kiloByte
