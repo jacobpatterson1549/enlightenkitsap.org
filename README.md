@@ -21,3 +21,21 @@ Run the site with `go generate && go run enlightenkitsap.org`
 [VSCode](https://code.visualstudio.com/) is a useful integrated development environment.
 
 Build the site as a single executable to the build folder with `go generate && go build -o build/enlightenkitsap enlightenkitsap.org`
+
+### file sizes
+
+Resources should not bee too large.  The site will fail to build if resources are too large.
+
+#### images
+
+Images should be less than 50 kilobytes.  Resize images using [Imagemagick](https://imagemagick.org).  Change the percentage to resize a file to different dimensions
+```
+convert small.jpg -resize 40% SOURCE.jpg
+```
+
+### pdf
+
+PDFs should be less than 10 megabytes.  Shrink PDFs with the [Ghostscript](https://ghostscript.com) command below.  Improve the file size by changing the `-dPDFSETTINGS=/` argument to screen/ebook/printer/default.
+```
+gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/printer -dNOPAUSE -dBATCH -sOutputFile=small.pdf SOURCE.pdf
+```

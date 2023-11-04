@@ -317,8 +317,9 @@ func (s *Site) addEventFile(eg *EventGroup, dir, year string, ff fs.DirEntry) er
 		if err := s.addImage(ff, dir, destDir, kB50); err != nil {
 			return fmt.Errorf("adding resource: %w", err)
 		}
-	case ".docx", ".pdf", ".ppt", ".pptx", ".xlsx":
-		if err := s.addResourceFile(year, nn, dir); err != nil {
+	case ".pdf", ".docx", ".xlsx":
+		destDir := path.Join("resources", "events", year)
+		if err := s.addImage(ff, dir, destDir, mB10); err != nil {
 			return fmt.Errorf("adding resource: %w", err)
 		}
 	default:
@@ -367,24 +368,6 @@ func (s *Site) addEvent(eg *EventGroup, dir, eventHtmlName, year string) error {
 				return fmt.Errorf("adding resources link: %w", err)
 			}
 		}
-	}
-	return nil
-}
-
-func (s *Site) addResourceFile(year, name, dir string) error {
-	srcP := path.Join(dir, name)
-	b, err := fs.ReadFile(s.fSys, srcP)
-	if err != nil {
-		return fmt.Errorf("reading resource: %w", err)
-	}
-	dest := path.Join("resources", "events", year)
-	destP := path.Join(s.dest, dest)
-	if err := s.mkdirAll(destP); err != nil {
-		return fmt.Errorf("making directory: %w", err)
-	}
-	destF := path.Join(destP, name)
-	if err := s.writeFile(destF, b); err != nil {
-		return fmt.Errorf("writing resource: %w", err)
 	}
 	return nil
 }

@@ -15,8 +15,10 @@ const (
 	events    = "events"
 	about     = "about"
 	perm      = 0764
-	kiloByte  = 1_000
+	kiloByte  = 1_000 * 1
+	megaByte  = 1_000 * kiloByte
 	kB50      = 50 * kiloByte
+	mB10      = 10 * megaByte
 )
 
 func usage() {
