@@ -53,6 +53,7 @@ func (s *Site) addMain() error {
 		{about, "purpose-statement", "Purpose Statement"},
 		{about, "volunteers", "Volunteers"},
 		{events, "calendar", "Calendar"},
+		{events, "meeting-link", "Zoom Meeting Link"},
 		{events, "sign-up", "Sign Up For Events"},
 	}
 	for _, pg := range pages {
