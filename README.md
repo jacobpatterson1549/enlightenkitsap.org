@@ -26,6 +26,8 @@ Build the site as a single executable to the build folder with `go generate && g
 
 Resources should not bee too large.  The site will fail to build if resources are too large.
 
+List file sizes with `find internal/resources/* -type f | xargs du -h | sort -h`
+
 #### images
 
 Images should be less than 50 kilobytes.  Resize images using [Imagemagick](https://imagemagick.org).  Change the percentage to resize a file to different dimensions
