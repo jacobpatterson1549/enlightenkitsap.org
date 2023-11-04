@@ -75,6 +75,9 @@ func (s *Site) addMain() error {
 			return fmt.Errorf("adding images from: %w", err)
 		}
 	}
+	if err := s.addStatic("", "", "robots.txt"); err != nil {
+		return fmt.Errorf("adding robots.txt: %w", err)
+	}
 	return nil
 }
 
@@ -133,6 +136,19 @@ func (s *Site) addImage(f fs.DirEntry, src, destDir string, maxSize int) error {
 	destP := path.Join(dest, n)
 	if err := s.writeFile(destP, b); err != nil {
 		return fmt.Errorf("writing image: %w", err)
+	}
+	return nil
+}
+
+func (s *Site) addStatic(srcDir, destDir, name string) error {
+	src := path.Join(resources, srcDir, name)
+	dest := path.Join(s.dest, destDir, name)
+	data, err := fs.ReadFile(s.fSys, src)
+	if err != nil {
+		return fmt.Errorf("opening static file: %w", err)
+	}
+	if err := s.writeFile(dest, data); err != nil {
+		return fmt.Errorf("writing static file: %w", err)
 	}
 	return nil
 }
